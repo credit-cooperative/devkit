@@ -1,6 +1,6 @@
-# 🛠️ Sablier Devkit
+# 🛠️ Credit-cooperative Devkit
 
-This repository contains configuration files and reusable scripts for various Sablier repositories.
+This repository contains configuration files and reusable scripts for various credit-cooperative repositories.
 
 The files are meant to be extended and customized as needed.
 
@@ -21,7 +21,7 @@ workflow.
 
 ## 🚀 Setup Script
 
-This is meant to be run by Sablier Labs employees and staff.
+This is meant to be run by credit-cooperative employees and staff.
 
 See [`setup.sh`](./shell/setup.sh) for details.
 

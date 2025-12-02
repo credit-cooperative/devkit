@@ -8,7 +8,7 @@
 #
 # Usage:
 #   1. Clone & run locally:
-#      git clone https://github.com/sablier-labs/devkit.git
+#      git clone https://github.com/credit-cooperative/devkit.git
 #      cd devkit/shell
 #      sh setup.sh
 #      # Or make it executable:
@@ -16,12 +16,12 @@
 #      ./setup.sh
 #
 #   2. Directly from GitHub:
-#      curl -fsSL https://raw.githubusercontent.com/sablier-labs/devkit/main/shell/setup.sh | sh
+#      curl -fsSL https://raw.githubusercontent.com/credit-cooperative/devkit/main/shell/setup.sh | sh
 
 # Exit on error or undefined variable
 set -eu
 
-LOG_FILE="sablier_devkit_setup.log"
+LOG_FILE="credit-cooperative_devkit_setup.log"
 
 printf "Logging to %s\n" "$LOG_FILE"
 # Redirect both stdout and stderr to log file

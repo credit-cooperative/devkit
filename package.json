@@ -1,15 +1,15 @@
 {
-  "name": "@sablier/devkit",
-  "description": "Configuration files and reusable scripts for Sablier repositories",
+  "name": "@credit-cooperative/devkit",
+  "description": "Configuration files and reusable scripts for credit-cooperative repositories",
   "license": "MIT",
   "type": "module",
-  "version": "1.5.0",
+  "version": "1.0.0",
   "author": {
-    "name": "Sablier Labs Ltd",
-    "url": "https://sablier.com"
+    "name": "credit-cooperative",
+    "url": "https://app.creditcoop.xyz/lend"
   },
   "bugs": {
-    "url": "https://github.com/sablier-labs/devkit/issues"
+    "url": "https://github.com/credit-cooperative/devkit/issues"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.7",
@@ -37,7 +37,7 @@
     "config",
     "devkit",
     "prettier",
-    "sablier",
+    "credit-coop",
     "tsconfig",
     "typescript"
   ],
@@ -46,6 +46,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sablier-labs/devkit.git"
+    "url": "git+https://github.com/credit-cooperative/devkit.git"
   }
 }

@@ -68,7 +68,7 @@ runs:
       run: "npm install -g @antfu/ni"
       shell: bash
 
-    - uses: sablier-labs/devkit/actions/node-cache@main
+    - uses: credit-cooperative/devkit/actions/node-cache@main
       if: inputs.enable-cache == 'true'
       id: node-cache
       with:

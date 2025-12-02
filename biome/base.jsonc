@@ -1,4 +1,4 @@
-// Sablier Devkit configuration for Biome v2: https://next.biomejs.dev
+// Credit-cooperative Devkit configuration for Biome v2: https://next.biomejs.dev
 //
 // This is a shared base configuration meant to be extended in consuming projects.
 //
@@ -6,15 +6,14 @@
 // which files to lint and format. For example:
 //
 //   {
-//     "extends": ["@sablier/devkit/biome"],
+//     "extends": ["@credit-cooperative/devkit/biome"],
 //     "files": {
 //       "includes": ["**/*.{css,js,jsx,json,ts,tsx}", "!node_modules"]
 //     }
 //   }
 //
 // You may also add override blocks with custom `includes` patterns for
-// granular rule customization. See ~/sablier/frontend/ui/biome.jsonc for a
-// complete example.
+// granular rule customization. 
 {
   "$schema": "https://biomejs.dev/schemas/latest/schema.json",
   "assist": {
