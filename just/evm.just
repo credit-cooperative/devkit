@@ -11,6 +11,9 @@ mod base
 # Foundry: https://getfoundry.sh
 forge := require("forge")
 
+# Bun: https://bun.sh
+bun := require("bun")
+
 # Ni: https://github.com/antfu-collective/ni
 na := require("na")
 nlx := require("nlx")
@@ -37,6 +40,9 @@ GLOBS_CLEAN := ```
 ```
 GLOBS_PRETTIER := "**/*.{md,mdx,yaml,yml}"
 GLOBS_SOLIDITY := "{scripts,src,tests}/**/*.sol"
+
+# Resolves both in this repo and in consuming projects (node_modules/@credit-cooperative/devkit)
+DEPLOYMENTS_SCRIPT := source_directory() / ".." / "scripts" / "deployments.ts"
 
 # ---------------------------------------------------------------------------- #
 #                                    RECIPES                                   #
@@ -170,4 +176,29 @@ test-lite *args:
 [group("foundry")]
 test-optimized: build-optimized
     FOUNDRY_PROFILE=test-optimized forge test
+
+# ---------------------------------------------------------------------------- #
+#                                  DEPLOYMENTS                                 #
+# ---------------------------------------------------------------------------- #
+
+# Run a deployment script, broadcast it, and update the deployments/ registry (pass --verify via args)
+[group("deployments")]
+deploy script chain *args:
+    forge script {{ script }} --rpc-url {{ chain }} --broadcast {{ args }}
+    just deployments-extract {{ script }}
+
+# Simulate a deployment script against a chain without broadcasting
+[group("deployments")]
+deploy-dry script chain *args:
+    forge script {{ script }} --rpc-url {{ chain }} {{ args }}
+
+# Update the deployments/ registry from the latest broadcast of a deployment script
+[group("deployments")]
+deployments-extract script:
+    bun "{{ DEPLOYMENTS_SCRIPT }}" extract --script {{ script }}
+
+# Verify that every contract in the deployments/ registry has code on-chain
+[group("deployments")]
+deployments-check *args:
+    bun "{{ DEPLOYMENTS_SCRIPT }}" check {{ args }}
 alias to := test-optimized

@@ -1,0 +1,66 @@
+# Reusable workflow: notifies the address-book aggregator repo when a project's
+# committed deployments/ registry changes on the default branch.
+#
+# Usage in a consuming project (.github/workflows/deployments.yml):
+#
+#   name: Deployments
+#   on:
+#     push:
+#       branches: [main]
+#       paths: ["deployments/**"]
+#   jobs:
+#     dispatch:
+#       uses: credit-cooperative/devkit/.github/workflows/deployments-dispatch.yml@main
+#       secrets:
+#         dispatch-token: ${{ secrets.ADDRESS_BOOK_DISPATCH_TOKEN }}
+#
+# The dispatch token must be a PAT or GitHub App token with permission to send
+# repository_dispatch events to the target repo (contents: write).
+name: Deployments Dispatch
+
+on:
+  workflow_call:
+    inputs:
+      target-repo:
+        default: credit-cooperative/address-book
+        description: Aggregator repository that receives the repository_dispatch event
+        required: false
+        type: string
+    secrets:
+      dispatch-token:
+        description: Token with permission to dispatch events to the target repository
+        required: true
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Collect changed registry files
+        id: changes
+        run: | #shell
+          before="${{ github.event.before }}"
+          if [ -z "$before" ] || ! git cat-file -e "$before" 2>/dev/null; then
+            before="$(git rev-parse HEAD^ 2>/dev/null || git hash-object -t tree /dev/null)"
+          fi
+          files="$(git diff --name-only "$before" "${{ github.sha }}" -- 'deployments/*.json' \
+            | jq --raw-input . | jq --slurp --compact-output .)"
+          echo "files=$files" >> "$GITHUB_OUTPUT"
+          echo "Changed registry files: $files"
+
+      - name: Send repository_dispatch to the aggregator
+        if: steps.changes.outputs.files != '[]'
+        env:
+          GH_TOKEN: ${{ secrets.dispatch-token }}
+        run: | #shell
+          jq --null-input \
+            --arg repo "${{ github.repository }}" \
+            --arg ref "${{ github.sha }}" \
+            --argjson files '${{ steps.changes.outputs.files }}' \
+            '{event_type: "deployments-updated", client_payload: {repo: $repo, ref: $ref, files: $files}}' \
+            | gh api "repos/${{ inputs.target-repo }}/dispatches" --input -
+          echo "Dispatched deployments-updated to ${{ inputs.target-repo }}"

@@ -1,0 +1,34 @@
+{
+  "chain": 84532,
+  "commit": "abc1234",
+  "receipts": [
+    {
+      "blockNumber": "0x100",
+      "status": "0x1",
+      "transactionHash": "0x00000000000000000000000000000000000000000000000000000000000000a1"
+    }
+  ],
+  "timestamp": 1765000000,
+  "transactions": [
+    {
+      "arguments": ["0x00000000000000000000000000000000000000A1"],
+      "contractAddress": "0x00000000000000000000000000000000000000c1",
+      "contractName": "PaymentRails",
+      "hash": "0x00000000000000000000000000000000000000000000000000000000000000a1",
+      "transaction": {
+        "from": "0x00000000000000000000000000000000000000d1"
+      },
+      "transactionType": "CREATE"
+    },
+    {
+      "additionalContracts": [
+        {
+          "address": "0x00000000000000000000000000000000000000e1",
+          "transactionType": "CREATE"
+        }
+      ],
+      "hash": "0x00000000000000000000000000000000000000000000000000000000000000a2",
+      "transactionType": "CALL"
+    }
+  ]
+}
