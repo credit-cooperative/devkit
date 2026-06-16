@@ -10,6 +10,10 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    # The default GITHUB_TOKEN is read-only in this repo; the release creation and the
+    # major-version branch push both need write access to repository contents.
+    permissions:
+      contents: write
     steps:
       - name: Check out the repo
         uses: actions/checkout@v5
