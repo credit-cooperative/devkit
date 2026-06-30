@@ -10,12 +10,14 @@
 #       paths: ["deployments/**"]
 #   jobs:
 #     dispatch:
-#       uses: credit-cooperative/devkit/.github/workflows/deployments-dispatch.yml@main
+#       uses: credit-cooperative/devkit/.github/workflows/deployments-dispatch.yml@v1
 #       secrets:
-#         dispatch-token: ${{ secrets.ADDRESS_BOOK_DISPATCH_TOKEN }}
+#         app-id: ${{ secrets.CC_CI_APP_ID }}
+#         app-private-key: ${{ secrets.CC_CI_APP_PRIVATE_KEY }}
 #
-# The dispatch token must be a PAT or GitHub App token with permission to send
-# repository_dispatch events to the target repo (contents: write).
+# Authenticates as the org-owned "Credit Coop CI" GitHub App and mints a short-lived
+# installation token (scoped to the target repo) to send the repository_dispatch event.
+# The App must be installed on the target repo with Contents: write.
 name: Deployments Dispatch
 
 on:
@@ -27,8 +29,11 @@ on:
         required: false
         type: string
     secrets:
-      dispatch-token:
-        description: Token with permission to dispatch events to the target repository
+      app-id:
+        description: GitHub App ID used to mint the dispatch token
+        required: true
+      app-private-key:
+        description: GitHub App private key (PEM) used to mint the dispatch token
         required: true
 
 jobs:
@@ -39,6 +44,21 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
+
+      - name: Resolve target repo name
+        id: target
+        env:
+          TARGET_REPO: ${{ inputs.target-repo }}
+        run: echo "name=${TARGET_REPO##*/}" >> "$GITHUB_OUTPUT"
+
+      - name: Mint a GitHub App token scoped to the aggregator
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.app-id }}
+          private-key: ${{ secrets.app-private-key }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ steps.target.outputs.name }}
 
       - name: Collect changed registry files
         id: changes
@@ -55,7 +75,7 @@ jobs:
       - name: Send repository_dispatch to the aggregator
         if: steps.changes.outputs.files != '[]'
         env:
-          GH_TOKEN: ${{ secrets.dispatch-token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: | #shell
           jq --null-input \
             --arg repo "${{ github.repository }}" \
