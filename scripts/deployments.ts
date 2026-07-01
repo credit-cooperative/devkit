@@ -212,6 +212,63 @@ function writeRegistry(path: string, registry: Registry): void {
   writeFileSync(path, `${JSON.stringify(sorted, null, 2)}\n`);
 }
 
+/** Recursively find the first file named `fileName` under `dir`. */
+function findArtifact(dir: string, fileName: string): string | null {
+  if (!existsSync(dir)) {
+    return null;
+  }
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      const found = findArtifact(full, fileName);
+      if (found) {
+        return found;
+      }
+    } else if (entry.name === fileName) {
+      return full;
+    }
+  }
+  return null;
+}
+
+/** Read a contract's ABI from its Foundry artifact: out/<name>.sol/<name>.json (fallback: search out/). */
+function readArtifactAbi(root: string, name: string): unknown[] | null {
+  const outRoot = join(root, "out");
+  const primary = join(outRoot, `${name}.sol`, `${name}.json`);
+  const path = existsSync(primary) ? primary : findArtifact(outRoot, `${name}.json`);
+  if (!path) {
+    return null;
+  }
+  const artifact = readJson<{ abi?: unknown[] }>(path);
+  return Array.isArray(artifact.abi) ? artifact.abi : null;
+}
+
+/**
+ * Emit chain-independent ABI JSON to `<outDir>/abis/<Contract>.json` for the deployed contracts plus any
+ * contract/interface types listed in `<outDir>/abi-extras.json` (e.g. factory-created facilities that have no
+ * deployed singleton address). ABIs are read from the Foundry `out/` build artifacts.
+ */
+function emitAbis(root: string, outDir: string, deployed: string[]): void {
+  const extrasPath = join(outDir, "abi-extras.json");
+  const extras = existsSync(extrasPath) ? readJson<string[]>(extrasPath) : [];
+  const names = [...new Set([...deployed, ...extras])].sort();
+  const abisDir = join(outDir, "abis");
+  const written: string[] = [];
+  for (const name of names) {
+    const abi = readArtifactAbi(root, name);
+    if (!abi) {
+      warn(`no out/ artifact ABI found for ${name}; skipping (run a build so out/ exists)`);
+      continue;
+    }
+    mkdirSync(abisDir, { recursive: true });
+    writeFileSync(join(abisDir, `${name}.json`), `${JSON.stringify(abi, null, 2)}\n`);
+    written.push(name);
+  }
+  if (written.length > 0) {
+    console.log(`\nABIs written to ${abisDir}: ${written.join(", ")}`);
+  }
+}
+
 function extract(args: Record<string, string>): void {
   const root = args.root ?? process.cwd();
   const outDir = args.out ?? join(root, "deployments");
@@ -302,6 +359,12 @@ function extract(args: Record<string, string>): void {
   for (const result of results) {
     console.log(`  [${result.outcome}] ${result.name} -> ${result.address}`);
   }
+  emitAbis(
+    root,
+    outDir,
+    results.map((r) => r.name),
+  );
+
   console.log("\nReview the diff and commit the registry change to make it canonical.");
 }
 

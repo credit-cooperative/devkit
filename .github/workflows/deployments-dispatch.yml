@@ -67,7 +67,7 @@ jobs:
           if [ -z "$before" ] || ! git cat-file -e "$before" 2>/dev/null; then
             before="$(git rev-parse HEAD^ 2>/dev/null || git hash-object -t tree /dev/null)"
           fi
-          files="$(git diff --name-only "$before" "${{ github.sha }}" -- 'deployments/*.json' \
+          files="$(git diff --name-only "$before" "${{ github.sha }}" -- 'deployments/*.json' 'deployments/abis/*.json' \
             | jq --raw-input . | jq --slurp --compact-output .)"
           echo "files=$files" >> "$GITHUB_OUTPUT"
           echo "Changed registry files: $files"

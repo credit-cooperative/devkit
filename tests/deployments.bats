@@ -71,6 +71,25 @@ assert_registry_contains() {
   assert_registry_contains '"version": "9.9.9"'
 }
 
+@test "extract emits ABIs for deployed contracts and declared extras" {
+  check_bun
+  setup_project
+
+  # Foundry artifacts: the deployed contract (PaymentRails) + a factory-created type (RailsFacility)
+  mkdir -p "${TEST_TEMP_DIR}/out/PaymentRails.sol" "${TEST_TEMP_DIR}/out/RailsFacility.sol" "${TEST_TEMP_DIR}/deployments"
+  echo '{"abi":[{"type":"function","name":"echo","inputs":[],"outputs":[]}]}' > "${TEST_TEMP_DIR}/out/PaymentRails.sol/PaymentRails.json"
+  echo '{"abi":[{"type":"function","name":"draw","inputs":[],"outputs":[]}]}' > "${TEST_TEMP_DIR}/out/RailsFacility.sol/RailsFacility.json"
+  # RailsFacility has no deployed singleton address — declared so its ABI still ships
+  echo '["RailsFacility"]' > "${TEST_TEMP_DIR}/deployments/abi-extras.json"
+
+  extract_fixture "broadcast-v1.json"
+  assert_success
+
+  [ -f "${TEST_TEMP_DIR}/deployments/abis/PaymentRails.json" ]   # deployed singleton
+  [ -f "${TEST_TEMP_DIR}/deployments/abis/RailsFacility.json" ]  # declared extra (factory-created type)
+  grep -q '"draw"' "${TEST_TEMP_DIR}/deployments/abis/RailsFacility.json"
+}
+
 @test "extract is idempotent for an unchanged deployment" {
   check_bun
   setup_project

@@ -5,18 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Common Changelog](https://common-changelog.org/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+[1.3.0]: https://github.com/credit-cooperative/devkit/releases/tag/v1.3.0
 [1.2.0]: https://github.com/credit-cooperative/devkit/releases/tag/v1.2.0
 [1.1.0]: https://github.com/credit-cooperative/devkit/releases/tag/v1.1.0
 [1.0.0]: https://github.com/yourorg/devkit/releases/tag/v1.0.0
+
+## [1.3.0] - 2026-07-02
+
+### Added
+
+- `deployments.ts extract` now also emits chain-independent contract ABIs to `deployments/abis/<Contract>.json`, read
+  from the Foundry `out/` build artifacts, for every deployed contract **plus** any contract/interface types listed in
+  an optional `deployments/abi-extras.json` (e.g. factory-created facilities that have no deployed singleton address).
+  Lets the address-book aggregator ship ABIs alongside addresses.
+- `deployments-dispatch.yml` now includes `deployments/abis/*.json` in the change set it dispatches.
 
 ## [1.2.0] - 2026-06-23
 
 ### Changed
 
-- `deployments-dispatch.yml`: authenticate as the org-owned GitHub App instead of a raw token. The reusable
-  workflow now takes `app-id` + `app-private-key` secrets (was `dispatch-token`) and mints a short-lived
-  installation token scoped to the target repo. **Breaking for callers**: update the caller's `secrets:` block to
-  pass `app-id`/`app-private-key` (see the usage header in the workflow).
+- `deployments-dispatch.yml`: authenticate as the org-owned GitHub App instead of a raw token. The reusable workflow now
+  takes `app-id` + `app-private-key` secrets (was `dispatch-token`) and mints a short-lived installation token scoped to
+  the target repo. **Breaking for callers**: update the caller's `secrets:` block to pass `app-id`/`app-private-key`
+  (see the usage header in the workflow).
 
 ## [1.1.0] - 2026-06-12
 
